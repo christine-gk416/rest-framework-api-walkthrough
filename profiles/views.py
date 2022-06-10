@@ -2,9 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404
+from drf_app.permissions import IsOwnerOrReadOnly
+
 from .models import Profile
 from .serializers import ProfileSerializer
-from drf_app.permissions import IsOwnerOrReadOnly
+
 
 
 class ProfileList(APIView):
@@ -47,4 +49,3 @@ class ProfileDetail(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
