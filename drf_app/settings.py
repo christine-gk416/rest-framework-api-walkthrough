@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+import re
 import dj_database_url
 if os.path.exists('env.py'):
     import env
@@ -28,7 +29,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', '')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = 'DEV' in os.environ
+# DEBUG = 'DEV' in os.environ
+
+DEBUG = True
 
 ALLOWED_HOSTS = ['drf-app-test1.herokuapp.com','localhost']
 
@@ -60,31 +63,31 @@ INSTALLED_APPS = [
     'followers',
 ]
 
-SITE_ID = 1
+# SITE_ID = 1
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [( 
-        'rest_framework.authentication.SessionAuthentication' 
-        if 'DEV' in os.environ 
-        else 'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
-    )], 
-    'DEFAULT_PAGINATION_CLASS':  'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    'DATETIME_FORMAT': '%d %b %Y'
-    }
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [( 
+#         'rest_framework.authentication.SessionAuthentication' 
+#         if 'DEV' in os.environ 
+#         else 'dj_rest_auth.jwt_auth.JWTCookieAuthentication'
+#     )], 
+#     'DEFAULT_PAGINATION_CLASS':  'rest_framework.pagination.PageNumberPagination',
+#     'PAGE_SIZE': 10,
+#     'DATETIME_FORMAT': '%d %b %Y'
+#     }
 
-if 'DEV' not in os.environ:
-    REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
-        'rest_framework.renderers.JSONRenderer'
-    ]
+# if 'DEV' not in os.environ:
+#     REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = [
+#         'rest_framework.renderers.JSONRenderer'
+#     ]
 
-REST_USE_JWT = True
+# REST_USE_JWT = True
 
-JWT_AUTH_COOKIE = 'my-app-auth'
+# JWT_AUTH_COOKIE = 'my-app-auth'
 
-JWT_AUTH_SECURE = True
-JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
-REST_AUTH_SERIALIZERS = {'USER_DETAILS_SERIALIZER': 'drf_app.serializers.CurrentUserSerializer'}
+# JWT_AUTH_SECURE = True
+# JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
+# REST_AUTH_SERIALIZERS = {'USER_DETAILS_SERIALIZER': 'drf_app.serializers.CurrentUserSerializer'}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -97,14 +100,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-if 'CLIENT_ORIGIN' in os.environ:
-    CORS_ALLOWED_ORIGINS = [
-        os.environ.get('CLIENT_ORIGIN')
-    ]
-else:
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r"^https://.*\.gitpod\.io$",
-    ]
+# if 'CLIENT_ORIGIN' in os.environ:
+#     CORS_ALLOWED_ORIGINS = [
+#         os.environ.get('CLIENT_ORIGIN')
+#     ]
+# else:
+#     CORS_ALLOWED_ORIGIN_REGEXES = [
+#         r"^https://.*\.gitpod\.io$",
+#     ]
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -134,21 +137,27 @@ WSGI_APPLICATION = 'drf_app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
-    'default': ({
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    } if 'DEV' in os.environ else dj_database_url.parse(
-        os.environ.get('DATABASE_URL')
-    ))
+    }
 }
+
+# DATABASES = {
+#     'default': ({
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     } if 'DEV' in os.environ else dj_database_url.parse(
+#         os.environ.get('DATABASE_URL')
+#     ))
+# }
+
+if 'CLIENT_ORIGIN_DEV' in os.environ:
+    extracted_url = re.match(r'^.+-', os.environ.get('CLIENT_ORIGIN_DEV', ''), re.IGNORECASE).group(0)
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        rf"{extracted_url}(eu|us)\d+\w\.gitpod\.io$",
+    ]
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
