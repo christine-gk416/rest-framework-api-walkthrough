@@ -1,9 +1,11 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics, filters
+from drf_app.permissions import IsOwnerOrReadOnly
 from django.db.models import Count
 from django.http import Http404
-from drf_app.permissions import IsOwnerOrReadOnly
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 from .models import Profile
 from .serializers import ProfileSerializer
@@ -34,9 +36,12 @@ class ProfileList(generics.ListAPIView):
         following_count=Count('owner__following', distinct=True)
     ).order_by('-created_at')
     serializer_class = ProfileSerializer
+
     filter_backends = [
-        filters.OrderingFilter
+        filters.OrderingFilter,
+        DjangoFilterBackend
     ]
+
     ordering_fields = [
         'posts_count',
         'followers_count',
@@ -44,6 +49,11 @@ class ProfileList(generics.ListAPIView):
         'owner__following__created_at',
         'owner__followed__created_at',
     ]
+
+    filterset_fields = [
+        'owner__following__followed__profile'
+    ]
+
 
 
 # class ProfileDetail(APIView):
