@@ -25,17 +25,19 @@ class PostList(generics.ListCreateAPIView):
     ]
 
     ordering_fields = [
-        'comments_count',
-        'likes_count',
-        'owner__comment__created_at',
-        'owner__likes__created_at',
+        'likes_count',	
+        'comments_count',	
+        'likes__created_at',
     ]
 
     search_fields = ['owner__username', 'title']
 
-    filterset_fields = ['owner__profile', 'owner__followed__owner__profile',
-                        'likes__owner__profile']
-
+    filterset_fields = [	
+        'owner__followed__owner__profile',	
+        'likes__owner__profile',	
+        'owner__profile',	
+    ]
+    
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
     # serializer_class = PostSerializer
